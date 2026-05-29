@@ -1,15 +1,7 @@
 const jwt = require('jsonwebtoken');
+const { PrismaClient } = require('@prisma/client');
 
-const tasks = [
-        {
-            id: 1,
-            title: 'Belajar Backend'
-        },
-        {
-            id: 2,
-            title: 'Belajar Express'
-        }
-    ];
+const prisma = new PrismaClient();
 
 function login(req, res){
     const username = req.body.username;
@@ -24,40 +16,63 @@ function login(req, res){
     });
 }
 
-function getTasks(req, res){
-    const id = req.params.id;
-    const task = task.find(task => task.id === Number(id));
+async function getTasks(req, res){
+    const tasks = await prisma.task.findMany();
     res.json(tasks);
 }
 
-function createTasks(req, res){
+async function getTasksById(req, res){
+    const id = Number(req.params.id)
+    const task = await prisma.task.findUnique({
+        where: {
+            id : id
+        }
+    });
+    res.json(task);
+}
+
+async function createTasks(req, res){
     const title = req.body.title;
-    const taskBaru = {
-        id: tasks.length + 1,
-        title: title
-    }
-    tasks.push(taskBaru);
-    res.status(201).json(taskBaru);
+
+    const task = await prisma.task.create({
+        data: {
+            title : title
+        }
+    });
+    res.status(201).json(task);
 };
 
-function updateTasks(req, res){
-    const id = Number (req.params.id);
-    const task = tasks.find(task => task.id === Number(id));
+async function updateTasks(req, res){
+    const id = Number(req.params.id);
     const title = req.body.title;
-    task.title = title;
+
+    const task = await prisma.task.update({
+        where: {
+            id: id
+        },
+        data: {
+            title: title
+        }
+    });
     res.json(task);
 };
 
-function deleteTasks(req,res){
+async function deleteTasks(req,res){
     const id = Number(req.params.id);
-    const index = tasks.findIndex(task => task.id === Number(id));
-    tasks.splice(index, 1);
-    res.json(tasks);
+    const task = await prisma.task.delete({
+        where: {
+            id : id
+        }
+    });
+    res.json({
+        message: "Data berhasil dihapus"
+    });
 };
 
 
 module.exports = {
     getTasks,
+    getTasksById,
     createTasks,
     updateTasks,
     deleteTasks,

@@ -2,10 +2,11 @@ const express = require('express');
 const router = express.Router();
 const {
     getTasks,
+    getTasksById,
     createTasks,
     updateTasks,
     deleteTasks,
-    login
+    login,
 } = require('../controllers/taskController');
 const {
     validateTask
@@ -16,6 +17,8 @@ const {
 
 
 router.get('/tasks', getTasks);
+
+router.get('/tasks/:id', getTasksById);
 
 router.post('/login', login);
 
