@@ -11,7 +11,10 @@
         const token = authHeader.split(' ')[1];
         try{
 
-        jwt.verify(token, 'secretkey');
+        const decoded = jwt.verify(token, 'secretkey');
+
+        req.user = decoded;
+
         next()
 
         } catch (error){

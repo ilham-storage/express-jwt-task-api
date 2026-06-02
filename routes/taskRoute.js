@@ -6,6 +6,7 @@ const {
     createTasks,
     updateTasks,
     deleteTasks,
+    register,
     login,
 } = require('../controllers/taskController');
 const {
@@ -16,9 +17,11 @@ const {
 } = require('../middleware/authMiddleware');
 
 
-router.get('/tasks', getTasks);
+router.get('/tasks', authMiddleware, getTasks);
 
 router.get('/tasks/:id', getTasksById);
+
+router.post('/register', register);
 
 router.post('/login', login);
 
