@@ -19,7 +19,7 @@ const {
 
 router.get('/tasks', authMiddleware, getTasks);
 
-router.get('/tasks/:id', getTasksById);
+router.get('/tasks/:id', authMiddleware, getTasksById);
 
 router.post('/register', register);
 

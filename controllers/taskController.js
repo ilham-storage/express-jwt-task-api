@@ -27,7 +27,10 @@ if(existingUser){
         }
     });
     
-    res.status(201).json(user);
+    res.status(201).json({
+        id: user.id,
+        username: user.username
+    });
 };
 
 async function login(req, res){
@@ -61,7 +64,7 @@ async function login(req, res){
         username : user.username
     };
     
-    const token = jwt.sign(payload, 'secretkey');
+    const token = jwt.sign(payload, process.env.JWT_SECRET);
 
     res.json({
         token: token
@@ -79,18 +82,32 @@ async function getTasks(req, res){
 }
 
 async function getTasksById(req, res){
+
     const id = Number(req.params.id)
+
     const task = await prisma.task.findUnique({
         where: {
             id : id
         }
     });
+
+    if(!task){
+        return res.status(404).json({
+            message: "Task tidak ditemukan"
+        });
+    }
+
+    if(task.userId !== req.user.id){
+        return res.status(403).json({
+            message : "bukan halaman anda"
+        });
+    }
+
     res.json(task);
-};
+}
 
 async function createTasks(req, res){
     const title = req.body.title;
-    const userId = req.user.id;
 
     const task = await prisma.task.create({
         data: {
@@ -106,27 +123,61 @@ async function updateTasks(req, res){
     const id = Number(req.params.id);
     const title = req.body.title;
 
-    const task = await prisma.task.update({
+    const task = await prisma.task.findUnique({
         where: {
             id: id
-        },
-        data: {
-            title: title
         }
     });
-    res.json(task);
+
+     if(!task){
+        return res.status(404).json({
+            message: "Task tidak ditemukan"
+        });
+    }
+
+    if(task.userId !== req.user.id){
+        return res.status(403).json({
+            message : "bukan halaman anda"
+        });
+    }
+
+    const updatedTask = await prisma.task.update({
+        where: {
+            id
+        },
+        data: {
+            title
+        }
+    });
+    res.json(updatedTask);
+
 };
 
 async function deleteTasks(req,res){
     const id = Number(req.params.id);
-    const task = await prisma.task.delete({
+    const task = await prisma.task.findUnique({
         where: {
             id : id
         }
     });
-    res.json({
-        message: "Data berhasil dihapus"
+
+    if(!task){
+        return res.status(404).json({
+            message: "Task tidak ditemukan"
+        });
+    }
+
+    if(task.userId !== req.user.id){
+        return res.status(403).json({
+            message : "bukan halaman anda"
+        });
+    }
+     const deletedTask = await prisma.task.delete({
+        where: {
+            id
+        }
     });
+    res.json(deletedTask);
 };
 
 
