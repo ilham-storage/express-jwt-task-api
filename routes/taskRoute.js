@@ -5,6 +5,7 @@ const {
     getTasksById,
     createTasks,
     updateTasks,
+    toggleTask,
     deleteTasks,
     register,
     login,
@@ -26,6 +27,8 @@ router.post('/register', register);
 router.post('/login', login);
 
 router.post('/tasks', authMiddleware, validateTask, createTasks);
+
+router.patch('/tasks/:id/complete', authMiddleware, toggleTask)
 
 router.put('/tasks/:id', validateTask, updateTasks);
 
